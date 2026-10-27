@@ -3,7 +3,7 @@ from pymongo import MongoClient, version
 
 class DbConnector:
     """
-    Connects to the MongoDB server on the Ubuntu virtual machine.
+    Connects to the MongoDB server running in docker (see docker-compose.yml).
     Connector needs HOST, USER and PASSWORD to connect.
 
     Example:
@@ -13,10 +13,10 @@ class DbConnector:
     """
 
     def __init__(self,
-                 DATABASE='DATABASE_NAME',
-                 HOST="tdt4225-xx.idi.ntnu.no",
-                 USER="TEST_USER",
-                 PASSWORD="test123"):
+                 DATABASE='movies_db',
+                 HOST="localhost:27017",
+                 USER="g110",
+                 PASSWORD="g110pass"):
         uri = "mongodb://%s:%s@%s/%s" % (USER, PASSWORD, HOST, DATABASE)
         # Connect to the databases
         try:
