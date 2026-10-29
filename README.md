@@ -58,6 +58,18 @@ python example.py
 
 If everything works, `example.py` prints `You are connected to the database: movies_db`, then creates, prints and drops a `Person` collection.
 
+### 4. Load data and run Part 2
+
+Insert the cleaned data by running [Part1.2.ipynb](Part1.2.ipynb) (creates `movies` and `ratings`).
+
+Then run the Part 2 queries:
+
+```bash
+python part2_queries.py          # every task
+python part2_queries.py 4 7      # only tasks 4 and 7
+```
+
+
 ## Useful commands
 
 | Task | Command |
@@ -65,3 +77,4 @@ If everything works, `example.py` prints `You are connected to the database: mov
 | Start / stop the database | `docker compose up -d` / `docker compose stop` |
 | Wipe all data and start fresh | `docker compose down -v` |
 | MongoDB shell | `docker compose exec mongo mongosh -u g110 -p g110pass movies_db` |
+| Part 2 queries | `python part2_queries.py` or `python part2_queries.py 1 5` |
