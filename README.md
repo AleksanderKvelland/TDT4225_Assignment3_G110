@@ -2,7 +2,7 @@
 
 Deadline: 30 October 2026 at 14:00.
 
-GitHub repo: https://github.com/AleksanderKvelland/TDT4225-LargeData
+GitHub repo: https://github.com/AleksanderKvelland/TDT4225_Assignment3_G110
 
 Contributors: Aleksander Kvelland, André Klarpås, Brage Andreas Hoven
 
