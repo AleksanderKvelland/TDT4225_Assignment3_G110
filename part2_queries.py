@@ -259,7 +259,14 @@ class QueryProgram:
             {"release_date": 1, "cast": 1},
         )
         for movie in cursor:
-            top5 = movie["cast"][:5]
+            seen_ids, top5 = set(), []
+            for person in movie["cast"]:
+                if person["id"] in seen_ids:
+                    continue
+                seen_ids.add(person["id"])
+                top5.append(person)
+                if len(top5) == 5:
+                    break
             with_gender = [
                 person for person in top5
                 if person.get("gender") in ("female", "male")
