@@ -1,8 +1,9 @@
 import inspect
 import sys
 from collections import defaultdict
+from datetime import datetime
 from itertools import combinations
-from pprint import pprint
+from tabulate import tabulate
 
 from DbConnector import DbConnector
 
@@ -29,15 +30,30 @@ class QueryProgram:
                 ]
         return self._movie_genres_by_id
 
+    def format_cell(self, value):
+        """Make values nicer for tables: dates, whole floats, genre lists."""
+        if isinstance(value, datetime):
+            return value.strftime("%Y-%m-%d")
+        if isinstance(value, int) and not isinstance(value, bool):
+            return int(value)
+        if isinstance(value, float) and value.is_integer():
+            return int(value)
+        if isinstance(value, list):
+            return ", ".join(str(item) for item in value)
+        return value
+
     def print_result(self, result, n_docs=20):
-        """Pretty-print aggregation/cursor results (first n_docs) and return the full list."""
         docs = list(result)
-        for doc in docs[:n_docs]:
-            pprint(doc)
+        if len(docs) == 0:
+            print("(no results)")
+            return docs
+        shown = [
+            {key: self.format_cell(value) for key, value in doc.items()}
+            for doc in docs[:n_docs]
+        ]
+        print(tabulate(shown, headers="keys", tablefmt="github", floatfmt=".2f"))
         if len(docs) > n_docs:
             print("(%d docs, showing the first %d)" % (len(docs), n_docs))
-        elif len(docs) == 0:
-            print("(no results)")
 
         return docs
 
@@ -65,9 +81,9 @@ class QueryProgram:
                 "_id": 0,
                 "director": "$_id.name",
                 "director_id": "$_id.id",
-                "movie_count": 1,
-                "median_revenue": 1,
-                "mean_vote_average": 1,
+                "movie_count": "$movie_count",
+                "median_revenue": "$median_revenue",
+                "mean_vote_average": "$mean_vote_average",
             }},
         ]
         self.print_result(self.movies.aggregate(pipeline), n_docs=10)
@@ -151,8 +167,8 @@ class QueryProgram:
                 "_id": 0,
                 "actor": "$_id.name",
                 "actor_id": "$_id.id",
-                "movie_count": 1,
-                "genre_count": 1,
+                "movie_count": "$movie_count",
+                "genre_count": "$genre_count",
                 "example_genres": {"$slice": ["$distinct_genres", 5]},
             }},
         ]
@@ -183,11 +199,11 @@ class QueryProgram:
             {"$project": {
                 "_id": 0,
                 "collection": "$_id",
-                "movie_count": 1,
-                "total_revenue": 1,
-                "median_vote_average": 1,
-                "earliest_release": 1,
-                "latest_release": 1,
+                "movie_count": "$movie_count",
+                "total_revenue": "$total_revenue",
+                "median_vote_average": "$median_vote_average",
+                "earliest_release": "$earliest_release",
+                "latest_release": "$latest_release",
             }},
         ]
         self.print_result(self.movies.aggregate(pipeline), n_docs=10)
@@ -224,8 +240,8 @@ class QueryProgram:
                 "_id": 0,
                 "decade": "$_id.decade",
                 "primary_genre": "$_id.primary_genre",
-                "median_runtime": 1,
-                "movie_count": 1,
+                "median_runtime": "$median_runtime",
+                "movie_count": "$movie_count",
             }},
         ]
         self.print_result(self.movies.aggregate(pipeline))
@@ -283,10 +299,10 @@ class QueryProgram:
             {"$limit": 20},
             {"$project": {
                 "_id": 0,
-                "title": 1,
+                "title": "$title",
                 "year": {"$year": "$release_date"},
-                "vote_average": 1,
-                "vote_count": 1,
+                "vote_average": "$vote_average",
+                "vote_count": "$vote_count",
             }},
         ]
         self.print_result(self.movies.aggregate(pipeline), n_docs=20)
@@ -329,9 +345,9 @@ class QueryProgram:
                 "_id": 0,
                 "director": "$_id.director.name",
                 "actor": "$_id.actor.name",
-                "film_count": 1,
-                "mean_vote_average": 1,
-                "mean_revenue": 1,
+                "film_count": "$film_count",
+                "mean_vote_average": "$mean_vote_average",
+                "mean_revenue": "$mean_revenue",
             }},
         ]
         self.print_result(self.movies.aggregate(pipeline), n_docs=20)
@@ -361,8 +377,8 @@ class QueryProgram:
             {"$project": {
                 "_id": 0,
                 "original_language": "$_id",
-                "count": 1,
-                "example_title": 1,
+                "count": "$count",
+                "example_title": "$example_title",
             }},
         ]
         self.print_result(self.movies.aggregate(pipeline), n_docs=10)
@@ -401,11 +417,9 @@ class QueryProgram:
         by_variance = sorted(users, key=lambda row: row["population_variance"], reverse=True)[:10]
 
         print("Top 10 most genre-diverse users:")
-        for row in by_genres:
-            pprint(row)
+        self.print_result(by_genres)
         print("\nTop 10 highest-variance users:")
-        for row in by_variance:
-            pprint(row)
+        self.print_result(by_variance)
 
 
 def main():
